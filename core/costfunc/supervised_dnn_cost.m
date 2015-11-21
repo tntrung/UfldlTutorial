@@ -16,6 +16,20 @@ numHidden = numel(ei.layer_sizes) - 1;
 hAct = cell(numHidden+2, 1);
 gradStack = cell(numHidden+1, 1);
 
+%% set activation function
+switch ei.activation_fun
+    case 'logistic'
+        act_fun = @sigmoid;
+        act_fun_grad = @sigmoid_act_grad;
+    case 'tanh'
+        act_fun = @tanh;
+        act_fun_grad = @tanh_act_grad;
+    case 'relu'
+        act_fun = @(d) relu(d);
+        act_fun_grad = @relu_act_grad;
+end
+
+
 %% forward prop
 hAct{1} = data;
 
@@ -24,10 +38,13 @@ for i = 1:numHidden+1
     if i == numHidden+1
         for_cost = hAct{i+1};
     end
-    hAct{i+1} = sigmoid(hAct{i+1});
+    hAct{i+1} = act_fun(hAct{i+1});
 end
 
-pred_prob = hAct{numHidden+2};
+M = exp(for_cost);
+p = bsxfun(@rdivide, M, sum(M,1));
+
+pred_prob = p;
 
 %% return here if only predictions desired.
 if po
@@ -37,21 +54,27 @@ if po
 end;
 
 %% compute cost
-M = exp(for_cost);
-p = bsxfun(@rdivide, M, sum(M,1));
 
 m = size(data, 2);
 groundTruth = full(sparse(labels, 1:m, 1));
 ceCost = -sum(sum(groundTruth.*log(p)));
-delta  = -(groundTruth - p);
+delta  = p - groundTruth;
 
 for i = numHidden+1:-1:1
     
     gradStack{i} = struct;
+   
+    if (i > numHidden)
+        delta = delta.*ones(size(hAct{i+1}));
+    else
+        delta = delta.*act_fun_grad(hAct{i+1}); %% Fixed bug (not sigmoidGrad(hAct{i+1}))
+    end
+    
     gradStack{i}.W = delta * hAct{i}';
     gradStack{i}.b = sum(delta,2);
-    delta = (stack{i}.W'*delta).*sigmoidGrad(hAct{i});
     
+    delta = stack{i}.W' * delta;
+
 end
 
 %% compute weight penalty cost and gradient for non-bias terms
@@ -61,9 +84,9 @@ for i = 1:numHidden+1
     wCost = wCost + sum(stack{i}.W(:).^2);
 end
 
-cost = ceCost + .5 * ei.lambda * wCost ;
+cost = ceCost + .5 * ei.lambda * wCost;
 
-for i = numHidden + 1 : -1 : 1  
+for i = numHidden + 1 : -1 : 1
     gradStack{i}.W = gradStack{i}.W + ei.lambda * stack{i}.W;
 end
 
@@ -71,6 +94,3 @@ end
 [grad] = stack2params(gradStack);
 
 end
-
-
-

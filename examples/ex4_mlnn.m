@@ -41,11 +41,13 @@ ei.layer_sizes = [256, ei.output_dim];
 ei.lambda = 0;
 % which type of activation function to use in hidden layers
 % feel free to implement support for only the logistic sigmoid function
-ei.activation_fun = 'logistic';
+ei.activation_fun = 'tanh';
 
 %% setup random initial weights
 stack = initialize_weights(ei);
 params = stack2params(stack);
+
+% load('/home/mangroup/Downloads/ufl-master/mnn/params.mat');
 
 %% setup minfunc options
 options = [];
@@ -53,13 +55,14 @@ options.display = 'iter';
 options.maxFunEvals = 1e6;
 options.Method = 'lbfgs';
 
+% num_checks = 500;
+% pred_only = false;
+% grad_check(@supervised_dnn_cost, params, num_checks, ...
+%        ei, data_train(:, 1:100), labels_train(1:100, :), pred_only);
+   
 %% run training
 [opt_params,opt_value,exitflag,output] = minFunc(@supervised_dnn_cost,...
     params,options, ei, data_train, labels_train);
-
-%% check gradient
-% average_error = grad_check(@supervised_dnn_cost, opt_params, 10, ei, data_train, labels_train );
-% fprintf('gradient check error: %f\n', average_error);
 
 %% compute accuracy on the test and train set
 [~, ~, pred] = supervised_dnn_cost( opt_params, ei, data_test, [], true);
