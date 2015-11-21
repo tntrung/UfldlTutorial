@@ -1,0 +1,10 @@
+Improving neural network
+============================================================================================
+1. Mot so diem anh se khong dong vai tro quan trong cho namg neuron.
+   W trong cac tang co the sparse.
+   Giai bai nay su dung mot xap si sparse tuong tu nhu bai sparse coding (Thag toan show ra).
+
+
+2. Rang buoc them W giua cac tang: 
+
+   + lambda * norm(W1 * W2). 
