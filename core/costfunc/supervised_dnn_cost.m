@@ -25,7 +25,7 @@ switch ei.activation_fun
         act_fun = @tanh;
         act_fun_grad = @tanh_act_grad;
     case 'relu'
-        act_fun = @(d) relu(d);
+        act_fun = @relu;
         act_fun_grad = @relu_act_grad;
 end
 

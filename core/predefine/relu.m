@@ -1,3 +1,4 @@
-function relu (x) 
+function x = relu (x) 
 
-idx = find ( x < 0 )
+idx = x < 0 ;
+x (idx) = 0;
