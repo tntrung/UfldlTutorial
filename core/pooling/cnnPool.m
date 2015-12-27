@@ -33,7 +33,7 @@ pooledFeatures = zeros(convolvedDim / poolDim, ...
 poolFilter = ones( poolDim , poolDim );
 for iNumImages = 1 : numImages
     for iNumFilters = 1 : numFilters
-        pooled = conv2(convolvedFeatures(:,:,iNumFilters,iNumImages),poolFilter);
+        pooled = conv2(convolvedFeatures(:,:,iNumFilters,iNumImages),poolFilter,'valid');
         pooledFeatures(:,:,iNumFilters,iNumImages) = pooled(1:poolDim:end,1:poolDim:end) ./ (poolDim*poolDim);
     end
 end
